@@ -3,7 +3,7 @@ import os
 
 
 # host to listen on
-HOST ="192.168.116.128"
+HOST ="10.0.2.15"
 
 def main():
 	# raw socket
@@ -22,7 +22,14 @@ def main():
 
 
 	#### read packet
-	print(sniffer.recvfrom(65565))
+	# print(sniffer.recvfrom(65565))
+	info = sniffer.recvfrom(65565) ### returns a tuple, one with packet info and one with source IP 
+	print(info)
+	
+	from  ip_header_ctype import IP
+
+	ip_information = IP(info[0])
+	print(f"source: {ip_information.src_address}, dest: {ip_information.dst_address}, ttl: {ip_information.ttl}")
 
 	#### turn off promiscuous mode windows
 
