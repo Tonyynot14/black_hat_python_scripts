@@ -1,4 +1,5 @@
 import ipaddress
+from itertools import repeat
 import os 
 import socket
 import struct 
@@ -8,7 +9,7 @@ import time
 
 
 
-SUBNET = '10.0.2.15/24'
+SUBNET = '10.0.2.0/24'
 MESSAGE = "PYTHONBYTES"
 
 
@@ -55,6 +56,7 @@ class ICMP:
 
 class Scanner:
     def __init__(self,host):
+        self.host = host
         if os.name == 'nt':
             socket_protocol = socket.IPPROTO_IP
         else:
@@ -103,18 +105,29 @@ class Scanner:
         except KeyboardInterrupt:
             if os.name == "nt":
                 self.socket.ioctl(socket.SIO_RCVALL,socket.RCVALL_OFF)
+            print("")
+            print("User Interupted.")
+            if hosts_up:
+                print()
+                print()
+                print(f"Summary: Host up on {SUBNET}")
+                for host in sorted(hosts_up):
+                    print(f'{host}')
+                print('')
+            
             sys.exit()
 
 
 ## spray udp packets
-def udp_sender():
+def udp_sender(host):
     with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as sender:
         for ip in ipaddress.ip_network(SUBNET).hosts():
+            if ip == host:
+                continue
             sender.sendto(bytes(MESSAGE,'utf-8'), (str(ip),65212))
 
 
-def sniff(host):
-   pass 
+
    
 
 def main():
@@ -122,7 +135,12 @@ def main():
         host = sys.argv[1]
     else:
         host = "10.0.2.15"
-    sniff(host)
+    
+    s = Scanner(host)
+    time.sleep(5)
+    t = threading.Thread(target=udp_sender,args= (host,))
+    t.start()
+    s.sniff()
 
 
 
