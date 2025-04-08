@@ -17,6 +17,7 @@ class Server(paramiko.ServerInterface):
         return paramiko.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
 
     def check_auth_password(self,username,password):
+        #### password leak, but modify in use 
         if(username == 'ssh_user' and password == 'Password123'):
             return paramiko.AUTH_SUCCESSFUL
     
